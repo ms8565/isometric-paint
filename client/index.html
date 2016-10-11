@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+    <script type="text/babel" >
+        "use strict";
+        let socket;
+        
+        let draws = {};
+        let triangles = [];
+        let lastColors = [];
+        let highlightTri;
+        
+        let canvas;
+        let ctx;
+        let colorInput;
+        let currentColor;
+        let dragging = false;
+        let linesOn = true;
+        
+        class Triangle {
+            //Type 0 is a right facing triangle, type 1 is a left facing triangle
+            constructor(x, y, type, id){
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.color = "white";
+                this.id = id;
+                
+                this.highlight = false;
+                this.highlightColor = "black";
+                
+                //Create positions of vertices
+                this.length1 = 40;
+                this.length2 = 60;
+                this.x1 = this.x;
+                this.y1 = this.y;
+                
+                //set up other vertices based on length
+                if(this.type == 0){
+                    this.x2 = this.x1;
+                    this.y2 = this.y1 + this.length1;
+                    this.x3 = this.x1 + this.length2/2;
+                    this.y3 = this.y1 + this.length1/2;
+                }
+                else{
+                    this.x2 = this.x1 + this.length2/2;
+                    this.y2 = this.y1 - this.length1/2;
+                    this.x3 = this.x1 + this.length2/2;
+                    this.y3 = this.y1 + this.length1/2;
+                }
+            }
+            //Check if a point is inside the triangle
+            containsPoint(posX, posY){
+                const a = ((this.y2-this.y3)*(posX-this.x3) + (this.x3-this.x2)*(posY-this.y3)) / ((this.y2-this.y3)*(this.x1- this.x3) + (this.x3-this.x2)*(this.y1-this.y3));
+                const b = ((this.y3-this.y1)*(posX-this.x3) + (this.x1-this.x3)*(posY-this.y3)) / ((this.y2-this.y3)*(this.x1-this.x3) + (this.x3-this.x2)*(this.y1-this.y3));
+                const c = 1 - a - b;
+      
+                return (0<=a) && (a<=1) && (0<=b) && (b<=1) && (0<=c) && (c<=1);
+            }
+            draw(linesOn){
+                ctx.save();
+                if(this.highlight){
+                    ctx.fillStyle = this.highlightColor;
+                }
+                else{
+                    ctx.fillStyle = this.color;
+                }
+                
+                ctx.beginPath();
+                ctx.moveTo(this.x1, this.y1);
+                ctx.lineTo(this.x2, this.y2);
+                ctx.lineTo(this.x3, this.y3);
+                ctx.fill();
+                ctx.closePath();
+                if(linesOn) {
+                    ctx.stroke();
+                }
+                
+                ctx.restore();
+            }
+            highlightOn(highlightColor){
+                this.highlight = true;
+                this.highlightColor = highlightColor;
+            }
+            highlightOff(){
+                this.highlight = false;
+            }
+            setColor(newColor){
+                this.color = newColor;
+            }
+            getColor(){
+                return this.color;
+            }
+        };
+        
+        var testTri = new Triangle(30,30,0);
+        
+        const init = (e) => {
+            canvas = document.querySelector('canvas');
+            ctx = canvas.getContext('2d');
+            
+            canvas.onmousedown = onMouseDown;
+            canvas.onmouseup = onMouseUp;
+            canvas.onmousemove = onMouseMove;
+            
+            colorInput = document.getElementById('color-input');
+            colorInput.addEventListener("change",updateColor);
+            currentColor = colorInput.value;
+            
+            var linesBtn = document.getElementById('lines-toggle');
+            linesBtn.addEventListener("click",toggleLines);
+            
+            socket = io.connect();
+            setupSocket();
+            setupCanvas();
+        };
+        window.onload = init;
+        
+        const updateColor = () => {
+            currentColor = colorInput.value;
+        };
+        
+        const toggleLines = () => {
+            linesOn = !linesOn;
+        };
+        
+        const handleMessage = (data) => {
+            //Update canvas using the new data (the other user's array)
+            //Fill triangles in with new colors
+            for(var i = 0; i < data.triangles.length; i++){
+                triangles[data.triangles[i].id].setColor(data.triangles[i].color);
+            }
+            draw();
+        };
+        
+        const setupSocket = (e) => {
+             socket.on('connect', () => {
+                socket.emit('join', null);
+            });
+            socket.on('updateCanvas', (data) => {
+                handleMessage(data);
+            });
+
+        };
+        const setupCanvas = (e) => {
+            //create the array of triangles
+            //populate array with right facing triangles
+            var idNum = 0;
+            var posX = 0;
+            var posY = 0; 
+            var rowTrigger = true;
+            
+            while(posX<=canvas.width){
+                while(posY<=canvas.height){  
+                    triangles.push(new Triangle(posX,posY,0,idNum));
+                    idNum++;
+                    posY+= 39;
+                }
+                posX+=30;
+              
+                if(rowTrigger){
+                    posY=-20;}
+                 else{
+                    posY = 0;
+                }
+               rowTrigger = !rowTrigger;
+            }
+            
+            //Populate array with left facing triangles
+            rowTrigger = true;
+            posX = 0;
+            posY = 0; 
+            while(posX<=canvas.width){
+                while(posY<=canvas.height){  
+                    triangles.push(new Triangle(posX,posY,1,idNum));
+                    idNum++;
+                    posY+= 39;
+                }
+                posX+=30;
+              
+                if(rowTrigger){
+                    posY=-20;}
+                else{
+                    posY = 0;
+                }
+               rowTrigger = !rowTrigger;
+            }
+            for(var i = 0; i < triangles.length; i++){
+                lastColors[i] = triangles[i].color;
+            }
+            
+            highlightTri = triangles[0];
+            update(triangles);
+        };
+        
+        const onMouseDown = (e) => {
+            var mouse = {};
+            mouse.x = e.pageX - e.target.offsetLeft;
+            mouse.y = e.pageY - e.target.offsetTop;
+            
+            dragging = true;
+            
+            var changedTriangles = [];
+            
+            //Check if mouse is in triangles
+            for(var i = 0; i < triangles.length; i++){
+                if(triangles[i].containsPoint(mouse.x, mouse.y)){ 
+                    triangles[i].setColor(currentColor);
+                    changedTriangles.push(triangles[i]);
+                }
+            }
+            update(changedTriangles);
+
+        };
+        const onMouseUp = (e) => {
+            dragging = false;
+        };
+        const onMouseMove = (e) => {
+            var mouse = {};
+            mouse.x = e.pageX - e.target.offsetLeft;
+            mouse.y = e.pageY - e.target.offsetTop;
+            
+            var changedTriangles = [];
+            
+            //check if mouse is in triangles
+            for(var i = 0; i < triangles.length; i++){
+                if(triangles[i].containsPoint(mouse.x, mouse.y)){ 
+                    if(dragging){
+                        triangles[i].setColor(currentColor);
+                        changedTriangles.push(triangles[i]);
+                    }
+                    else{
+                        if(triangles[i].id != highlightTri.id){
+                            //Turn the highlight for the current triangle on
+                            triangles[i].highlightOn(currentColor);
+                            changedTriangles.push(triangles[i]);
+                            
+                            //Turn the highlight for the last triangle off
+                            highlightTri.highlightOff();
+                            changedTriangles.push(highlightTri);
+                            
+                            //Update hightlighted tri
+                            highlightTri = triangles[i];
+                        }
+                    }
+                }
+            }
+            
+            update(changedTriangles);
+            
+        };
+        
+        const update = (changedTriangles) => {
+        //update is called after a triangle is interacted with
+            
+            //send the server the array of triangles
+            socket.emit("draw", {triangles: changedTriangles});
+        };
+        
+        const draw = (e) => {
+            for(var i = 0; i < triangles.length; i++){
+                if(lastColors[i] != triangles.color){
+                    triangles[i].draw(linesOn);
+                }
+                lastColors[i] = triangles[i].color;
+            }
+        };
+        
+        
+        
+    
+    </script>
+</head>
+<body>
+    <canvas width="1000" height="600">
+		Your browser does not support Canvas
+	</canvas>
+    <p>
+        <label for="color-input">Current Color</label>
+        <input id="color-input" type="color" name="currentcolor" value="#ff0000">
+    </p>
+    <p>
+        <input id="lines-toggle" type="button" value="Toggle Lines">
+    </p>
+</body>
+</html>
