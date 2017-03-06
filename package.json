@@ -1,10 +1,10 @@
 {
-  "name": "syncing-data-4",
+  "name": "isometric-paint",
   "version": "1.0.0",
    "engines": {
     "node": "6.5.0"
   },
-  "description": "syncing data part 1",
+  "description": "Isometric Paint",
   "main": "index.js",
   "scripts": {
     "start": "node ./src/server.js",

@@ -11,6 +11,7 @@
         let triangles = [];
         let lastColors = [];
         let highlightTri;
+        let changedTriangles = [];
         
         let canvas;
         let ctx;
@@ -53,6 +54,11 @@
             }
             //Check if a point is inside the triangle
             containsPoint(posX, posY){
+                //Point precheck
+                if(posX > this.x+100 || posX < this.x-100 || posY > this.y+100 || posY < this.y-100 ){
+                    return false;
+                }
+                
                 const a = ((this.y2-this.y3)*(posX-this.x3) + (this.x3-this.x2)*(posY-this.y3)) / ((this.y2-this.y3)*(this.x1- this.x3) + (this.x3-this.x2)*(this.y1-this.y3));
                 const b = ((this.y3-this.y1)*(posX-this.x3) + (this.x1-this.x3)*(posY-this.y3)) / ((this.y2-this.y3)*(this.x1-this.x3) + (this.x3-this.x2)*(this.y1-this.y3));
                 const c = 1 - a - b;
@@ -131,6 +137,7 @@
             //Fill triangles in with new colors
             for(var i = 0; i < data.triangles.length; i++){
                 triangles[data.triangles[i].id].setColor(data.triangles[i].color);
+                changedTriangles.push(triangles[data.triangles[i].id]);
             }
             draw();
         };
@@ -260,12 +267,12 @@
         };
         
         const draw = (e) => {
-            for(var i = 0; i < triangles.length; i++){
-                if(lastColors[i] != triangles.color){
-                    triangles[i].draw(linesOn);
-                }
-                lastColors[i] = triangles[i].color;
+            
+            for(var i = 0; i < changedTriangles.length; i++){
+                changedTriangles[i].draw(linesOn);
             }
+            changedTriangles = [];
+
         };
         
         
