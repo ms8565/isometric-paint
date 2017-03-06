@@ -12,6 +12,7 @@
         let triangles = [];
         let lastColors = [];
         let highlightTri;
+        let currentSwatches = [];
         
         let canvas;
         let ctx;
@@ -100,7 +101,37 @@
                 return this.color;
             }
         };
-        
+
+        class SwatchBox {
+            constructor(){
+                this.swatchColors = [];
+                this.swatchBoxes = [];
+                for(var i = 0; i < 8; i++){
+                    let swatch = document.getElementById('swatch-box'+i);
+                    swatch.addEventListener("click", function(){
+                        updateColor(swatch.style.backgroundColor);
+                    });
+                    this.swatchBoxes.push();
+                    
+                    
+                    this.swatchColors.push('white');
+                }
+            }
+            addSwatch(color){
+                this.swatchColors.unshift(color);
+                //this.swatchColors.pop();
+                
+                updateColors();
+            }
+            updateColors(){
+                for(var i = 0; i < 8; i++){
+                    this.swatchBoxes[i].style.backgroundColor = swatchColors[i];
+                }
+            }
+            
+        }
+
+        var swatchBox = new SwatchBox();
         var testTri = new Triangle(30,30,0);
         
         const init = (e) => {
@@ -128,6 +159,7 @@
         
         const updateColor = (color) => {
             currentColor = "#"+colorInput.jscolor;
+            socket.emit("addSwatch", {newColor: currentColor});
         };
         
         const toggleLines = () => {
@@ -158,6 +190,11 @@
             });
             socket.on('setupFirstCanvas', (data) => {
                socket.emit("updateTriangles", {triangles: triangles});
+            });
+            socket.on('addSwatch', (data) => {
+               //currentSwatches = data.swatch;
+                //console.log("Swatches: "+currentSwatches);
+                swatchBox.addSwatch(data.swatch);
             });
 
         };
@@ -306,14 +343,18 @@
         <input id="lines-toggle" type="button" value="Toggle Lines">
     </p>
     <p id="color-picker">
-        <input id="color-input" class="jscolor" value="cc66ff" style="width:50px; height:20px;">
-
-        <script>
-        function update2(jscolor) {
-            // 'jscolor' instance can be used as a string
-            document.getElementById('color-input').style.backgroundColor = '#' + jscolor;
-        }
-        </script>
+        <div id="swatches">
+            <div id="swatch-box0" style="width: 20px; height:10px; background-color:blue;"></div>
+            <div id="swatch-box1" style="width: 20px; height:10px; background-color:blue;"></div>
+            <div id="swatch-box2" style="width: 20px; height:10px; background-color:blue;"></div>
+            <div id="swatch-box3" style="width: 20px; height:10px; background-color:blue;"></div>
+            <div id="swatch-box4" style="width: 20px; height:10px; background-color:blue;"></div>
+            <div id="swatch-box5" style="width: 20px; height:10px; background-color:blue;"></div>
+            <div id="swatch-box6" style="width: 20px; height:10px; background-color:blue;"></div>
+            <div id="swatch-box7" style="width: 20px; height:10px; background-color:blue;"></div>
+            
+        </div>
+        <input id="color-input" class="jscolor" value="cc66ff" style="width:50px; height:20px;"/>
     </p>
 </body>
 </html>
