@@ -21,6 +21,8 @@ console.log(`Listening on 127.0.0.1: ${port}`);
 const io = socketio(app);
 
 let currentTriangles = [];
+let currentColors = ['black'];
+
 let firstUser = true;
 
 const onJoined = (sock) => {
@@ -33,11 +35,9 @@ const onJoined = (sock) => {
     if(firstUser){
         socket.emit('setupFirstCanvas', null);
         firstUser = false;
-        console.log("first user");
     }
     else{
         socket.emit('updateCanvas', {triangles: currentTriangles});
-        console.log("not first");
     }
 };
 
@@ -50,7 +50,6 @@ const onDisconnect = (sock) => {
 };
 
 const onDraw = (sock) => {
-  console.log('draw');
   const socket = sock;
 
   socket.on('draw', (data) => {
@@ -61,13 +60,15 @@ const onDraw = (sock) => {
   });
 };
 
-const onUpdateTriangles = (sock) => {
-      console.log('update');
+const onUpdate = (sock) => {
     const socket = sock;
     
     socket.on('updateTriangles', (data) => {
-        console.log("Updating triangles");
         currentTriangles = data.triangles;
+    });
+    socket.on('updateColors', (data) => {
+        currentColors.push(data.newColor)
+        io.sockets.in('room1').emit('updateColors', currentColors);
     });
 };
 
@@ -75,5 +76,5 @@ io.sockets.on('connection', (socket) => {
   onJoined(socket);
   onDraw(socket);
   onDisconnect(socket);
-  onUpdateTriangles(socket);
+  onUpdate(socket);
 });
