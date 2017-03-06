@@ -11,7 +11,6 @@
         let triangles = [];
         let lastColors = [];
         let highlightTri;
-        let changedTriangles = [];
         
         let canvas;
         let ctx;
@@ -110,6 +109,7 @@
             canvas.onmousedown = onMouseDown;
             canvas.onmouseup = onMouseUp;
             canvas.onmousemove = onMouseMove;
+            canvas.onmouseout = onMouseOut;
             
             colorInput = document.getElementById('color-input');
             colorInput.addEventListener("change",updateColor);
@@ -121,6 +121,7 @@
             socket = io.connect();
             setupSocket();
             setupCanvas();
+            
         };
         window.onload = init;
         
@@ -130,16 +131,21 @@
         
         const toggleLines = () => {
             linesOn = !linesOn;
+            
+            //Redraw all triangles
+            drawAll();
         };
         
         const handleMessage = (data) => {
             //Update canvas using the new data (the other user's array)
             //Fill triangles in with new colors
+            let changedTriangles = [];
+            
             for(var i = 0; i < data.triangles.length; i++){
                 triangles[data.triangles[i].id].setColor(data.triangles[i].color);
                 changedTriangles.push(triangles[data.triangles[i].id]);
             }
-            draw();
+            drawChanged(changedTriangles);
         };
         
         const setupSocket = (e) => {
@@ -148,6 +154,9 @@
             });
             socket.on('updateCanvas', (data) => {
                 handleMessage(data);
+            });
+            socket.on('setupFirstCanvas', (data) => {
+               socket.emit("updateTriangles", {triangles: triangles});
             });
 
         };
@@ -199,7 +208,7 @@
             }
             
             highlightTri = triangles[0];
-            update(triangles);
+            
         };
         
         const onMouseDown = (e) => {
@@ -222,6 +231,9 @@
 
         };
         const onMouseUp = (e) => {
+            dragging = false;
+        };
+        const onMouseOut = (e) => {
             dragging = false;
         };
         const onMouseMove = (e) => {
@@ -266,12 +278,16 @@
             socket.emit("draw", {triangles: changedTriangles});
         };
         
-        const draw = (e) => {
+        const drawAll = (e) => {
+            for(var i = 0; i < triangles.length; i++){
+                triangles[i].draw(linesOn);   
+            }
+        };
+        const drawChanged = (changedTriangles) => {
             
             for(var i = 0; i < changedTriangles.length; i++){
                 changedTriangles[i].draw(linesOn);
             }
-            changedTriangles = [];
 
         };
         
@@ -281,7 +297,7 @@
     </script>
 </head>
 <body>
-    <canvas width="1000" height="600">
+    <canvas width="1000" height="645" style="cursor: default; ">
 		Your browser does not support Canvas
 	</canvas>
     <p>
