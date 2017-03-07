@@ -131,6 +131,10 @@
             
         }
 
+        const updateSwatches = (swatches) => {
+            
+        }
+
         var swatchBox = new SwatchBox();
         var testTri = new Triangle(30,30,0);
         
@@ -150,6 +154,12 @@
             var linesBtn = document.getElementById('lines-toggle');
             linesBtn.addEventListener("click",toggleLines);
             
+            var saveBtn = document.getElementById('save-btn');
+            saveBtn.addEventListener("click",saveCanvas);
+            
+            var clearBtn = document.getElementById('clear-btn');
+            clearBtn.addEventListener("click",clearCanvas);
+            
             socket = io.connect();
             setupSocket();
             setupCanvas();
@@ -168,6 +178,19 @@
             //Redraw all triangles
             drawAll();
         };
+        
+        const clearCanvas = () => {
+            for(var i = 0; i < triangles.length; i++){
+                triangles[i].setColor('white');
+            }
+            update(triangles);
+            drawAll();
+        }
+        
+        const saveCanvas = () => {
+            var image = canvas.toDataURL("image/png");
+			window.open(image);
+        }
         
         const handleMessage = (data) => {
             //Update canvas using the new data (the other user's array)
@@ -341,6 +364,12 @@
 	</canvas>
     <p>
         <input id="lines-toggle" type="button" value="Toggle Lines">
+    </p>
+    <p>
+        <input id="clear-btn" type="button" value="Clear">
+    </p>
+    <p>
+        <input id="save-btn" type="button" value="Save">
     </p>
     <p id="color-picker">
         <div id="swatches">
