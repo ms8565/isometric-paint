@@ -20,6 +20,7 @@
         let currentColor;
         let dragging = false;
         let linesOn = true;
+        let eyedropperMode = false;
         
         class Triangle {
             //Type 0 is a right facing triangle, type 1 is a left facing triangle
@@ -27,11 +28,11 @@
                 this.x = x;
                 this.y = y;
                 this.type = type;
-                this.color = "white";
+                this.color = "#ffffff";
                 this.id = id;
                 
                 this.highlight = false;
-                this.highlightColor = "black";
+                this.highlightColor = "#000000";
                 
                 //Create positions of vertices
                 this.length1 = 40;
@@ -102,40 +103,9 @@
             }
         };
 
-        class SwatchBox {
-            constructor(){
-                this.swatchColors = [];
-                this.swatchBoxes = [];
-                for(var i = 0; i < 8; i++){
-                    let swatch = document.getElementById('swatch-box'+i);
-                    swatch.addEventListener("click", function(){
-                        updateColor(swatch.style.backgroundColor);
-                    });
-                    this.swatchBoxes.push();
-                    
-                    
-                    this.swatchColors.push('white');
-                }
-            }
-            addSwatch(color){
-                this.swatchColors.unshift(color);
-                //this.swatchColors.pop();
-                
-                updateColors();
-            }
-            updateColors(){
-                for(var i = 0; i < 8; i++){
-                    this.swatchBoxes[i].style.backgroundColor = swatchColors[i];
-                }
-            }
-            
-        }
-
         const updateSwatches = (swatches) => {
             
         }
-
-        var swatchBox = new SwatchBox();
         var testTri = new Triangle(30,30,0);
         
         const init = (e) => {
@@ -160,6 +130,11 @@
             var clearBtn = document.getElementById('clear-btn');
             clearBtn.addEventListener("click",clearCanvas);
             
+            var eyedropperBtn = document.getElementById('eyedropper-btn');
+            eyedropperBtn.addEventListener("click",function(){
+                eyedropperMode = !eyedropperMode;
+            });
+            
             var shadowSwatch = document.getElementById('shadow');
             shadowSwatch.addEventListener("click",function(){
                 colorInput.jscolor.fromString(this.value);
@@ -172,14 +147,26 @@
                 updateColor();
             });
             
+            for(var i = 0; i < 8; i++){
+                var swatch = document.getElementById('swatch-box'+i);
+                
+                swatch.addEventListener("click",function(){
+                    colorInput.jscolor.fromString(this.value);
+                    updateColor();
+                });
+            }
+            
             socket = io.connect();
             setupSocket();
             setupCanvas();
+            updateColor();
             
         };
         window.onload = init;
         
         const updateColor = () => {
+            eyedropperMode = false;
+            
             currentColor = "#"+colorInput.jscolor;
             var originalColor = colorInput.jscolor;
             
@@ -201,7 +188,6 @@
             if(value < 0) value = 0;
             shadowSwatch.fromHSV(hue, saturation, value);
             
-            console.log(shadowSwatch.toHEXString());
             document.getElementById('shadow').value = shadowSwatch.toHEXString();
             document.getElementById('shadow').style.backgroundColor = shadowSwatch.toHEXString();
             colorInput.jscolor.fromString(currentColor);
@@ -223,7 +209,6 @@
             if(value > 100) value = 100;
             highlightSwatch.fromHSV(hue, saturation, value);
             
-            console.log(highlightSwatch.toHEXString());
             document.getElementById('highlight').value = highlightSwatch.toHEXString();
             document.getElementById('highlight').style.backgroundColor = highlightSwatch.toHEXString();
             colorInput.jscolor.fromString(currentColor);
@@ -241,7 +226,7 @@
         
         const clearCanvas = () => {
             for(var i = 0; i < triangles.length; i++){
-                triangles[i].setColor('white');
+                triangles[i].setColor('#ffffff');
             }
             update(triangles);
             drawAll();
@@ -274,10 +259,12 @@
             socket.on('setupFirstCanvas', (data) => {
                socket.emit("updateTriangles", {triangles: triangles});
             });
-            socket.on('addSwatch', (data) => {
-               //currentSwatches = data.swatch;
-                //console.log("Swatches: "+currentSwatches);
-                swatchBox.addSwatch(data.swatch);
+            socket.on('updateSwatches', (data) => {
+               for(var i = 0; i < data.swatches.length; i++){
+                   var swatch = document.getElementById('swatch-box'+i);
+                   swatch.value = data.swatches[i];
+                   swatch.style.backgroundColor = data.swatches[i];
+               }
             });
 
         };
@@ -344,6 +331,13 @@
             //Check if mouse is in triangles
             for(var i = 0; i < triangles.length; i++){
                 if(triangles[i].containsPoint(mouse.x, mouse.y)){ 
+                    if(eyedropperMode){
+                        console.log(triangles[i].getColor());
+                        var colorString = triangles[i].getColor().slice(1);
+                        colorInput.jscolor.fromString(colorString);
+                        updateColor();
+                    }
+                    
                     triangles[i].setColor(currentColor);
                     changedTriangles.push(triangles[i]);
                 }
@@ -356,39 +350,43 @@
         };
         const onMouseOut = (e) => {
             dragging = false;
+            highlightTri.highlightOff();
+            update([highlightTri]);
         };
         const onMouseMove = (e) => {
-            var mouse = {};
-            mouse.x = e.pageX - e.target.offsetLeft;
-            mouse.y = e.pageY - e.target.offsetTop;
-            
-            var changedTriangles = [];
-            
-            //check if mouse is in triangles
-            for(var i = 0; i < triangles.length; i++){
-                if(triangles[i].containsPoint(mouse.x, mouse.y)){ 
-                    if(dragging){
-                        triangles[i].setColor(currentColor);
-                        changedTriangles.push(triangles[i]);
-                    }
-                    else{
-                        if(triangles[i].id != highlightTri.id){
-                            //Turn the highlight for the current triangle on
-                            triangles[i].highlightOn(currentColor);
+            if(!eyedropperMode){
+                var mouse = {};
+                mouse.x = e.pageX - e.target.offsetLeft;
+                mouse.y = e.pageY - e.target.offsetTop;
+
+                var changedTriangles = [];
+
+                //check if mouse is in triangles
+                for(var i = 0; i < triangles.length; i++){
+                    if(triangles[i].containsPoint(mouse.x, mouse.y)){ 
+                        if(dragging){
+                            triangles[i].setColor(currentColor);
                             changedTriangles.push(triangles[i]);
-                            
-                            //Turn the highlight for the last triangle off
-                            highlightTri.highlightOff();
-                            changedTriangles.push(highlightTri);
-                            
-                            //Update hightlighted tri
-                            highlightTri = triangles[i];
+                        }
+                        else{
+                            if(triangles[i].id != highlightTri.id){
+                                //Turn the highlight for the current triangle on
+                                triangles[i].highlightOn(currentColor);
+                                changedTriangles.push(triangles[i]);
+
+                                //Turn the highlight for the last triangle off
+                                highlightTri.highlightOff();
+                                changedTriangles.push(highlightTri);
+
+                                //Update hightlighted tri
+                                highlightTri = triangles[i];
+                            }
                         }
                     }
                 }
+
+                update(changedTriangles);
             }
-            
-            update(changedTriangles);
             
         };
         
@@ -431,21 +429,24 @@
     <p>
         <input id="save-btn" type="button" value="Save">
     </p>
+    <p>
+        <input id="eyedropper-btn" type="button" value="Pick Color">
+    </p>
         <div id="swatches">
-            <button id="swatch-box0" style="width: 25px; height:25px; background-color:blue;"></button>
-            <button id="swatch-box1" style="width: 25px; height:25px; background-color:blue;"></button>
-            <button id="swatch-box2" style="width: 25px; height:25px; background-color:blue;"></button>
-            <button id="swatch-box3" style="width: 25px; height:25px; background-color:blue;"></button>
-            <button id="swatch-box4" style="width: 25px; height:25px; background-color:blue;"></button>
-            <button id="swatch-box5" style="width: 25px; height:25px; background-color:blue;"></button>
-            <button id="swatch-box6" style="width: 25px; height:25px; background-color:blue;"></button>
-            <button id="swatch-box7" style="width: 25px; height:25px; background-color:blue;"></button>
+            <button id="swatch-box0" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+            <button id="swatch-box1" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+            <button id="swatch-box2" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+            <button id="swatch-box3" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+            <button id="swatch-box4" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+            <button id="swatch-box5" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+            <button id="swatch-box6" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+            <button id="swatch-box7" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
             
         </div>
     
     <p>
         <button id="highlight" style="width: 25px; height:25px; background-color:white;"></button>
-        <input id="color-input" class="jscolor" value="cc66ff" style="width:50px; height:20px;">
+        <input type="button" id="color-input" class="jscolor {closable:true,closeText:'Close'}" value="cc66ff" style="width:50px; height:20px;">
         <button id="shadow" style="width: 25px; height:25px; background-color:black;"></button>
     </p>
 </body>

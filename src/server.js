@@ -21,7 +21,15 @@ console.log(`Listening on 127.0.0.1: ${port}`);
 const io = socketio(app);
 
 let currentTriangles = [];
-const currentColors = ['black'];
+const currentColors = ['#0f0000',
+                       '#00ff00',
+                       '#ffffff',
+                       '#ff00ff',
+                       '#fff0ff',
+                       '#f0ffff',
+                       '#ffffff',
+                       '#0000ff'
+                      ];
 
 let firstUser = true;
 
@@ -38,6 +46,7 @@ const onJoined = (sock) => {
   } else {
     socket.emit('updateCanvas', { triangles: currentTriangles });
   }
+  socket.emit('updateSwatches', {swatches: currentColors});
 };
 
 const onDisconnect = (sock) => {
@@ -66,8 +75,19 @@ const onUpdate = (sock) => {
     currentTriangles = data.triangles;
   });
   socket.on('addSwatch', (data) => {
-    currentColors.push(data.newColor);
-    io.sockets.in('room1').emit('updateSwatches', { swatch: data.newColor });
+    const colorIndex = currentColors.indexOf(data.newColor);
+    //Check if color is already in the array
+    if(colorIndex != -1){
+      //If it is, move it to the front
+      currentColors.unshift(currentColors.splice(colorIndex, 1)[0]);
+    }
+    else{
+      //If it isn't, insert it and pop the last value
+      currentColors.unshift(data.newColor);
+      currentColors.pop();
+    }
+      
+    io.sockets.in('room1').emit('updateSwatches', { swatches: currentColors });
   });
 };
 
