@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="http://bgrins.github.io/TinyColor/tinycolor.js"></script>
+    <script src="http://jscolor.com/release/2.0/jscolor-2.0.4/jscolor.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
     <script type="text/babel" >
@@ -162,7 +162,14 @@
             
             var shadowSwatch = document.getElementById('shadow');
             shadowSwatch.addEventListener("click",function(){
-                
+                colorInput.jscolor.fromString(this.value);
+                updateColor();
+            });
+            
+            var highlightSwatch = document.getElementById('highlight');
+            highlightSwatch.addEventListener("click",function(){
+                colorInput.jscolor.fromString(this.value);
+                updateColor();
             });
             
             socket = io.connect();
@@ -174,47 +181,52 @@
         
         const updateColor = () => {
             currentColor = "#"+colorInput.jscolor;
+            var originalColor = colorInput.jscolor;
             
             //var shadowBtn = document.getElementById('shadow-btn');
            // shadowBtn = 
-                
-            var color = document.getElementById('color-input').value;
-            color = color.toLowerCase();
             
-            //Set new shadow color
-            var tempColor = tinycolor(color).toHsv();
+            var shadowSwatch = colorInput.jscolor;
+            
             
             //Decrease hue
-            tempColor.h-= 5;
-            if(tempColor.h < 0) tempColor.h = 0;
+            var hue = shadowSwatch.hsv[0] - 5;
+            if(hue < 0) hue = 0;
             
-            //Decrease brightness/value
-            tempColor.v-= (15/100);
-            if(tempColor.v < 0) tempColor.v = 0;
+            //Saturation stays the same
+            var saturation = shadowSwatch.hsv[1];
             
-            tempColor = 'hsv('+tempColor.h+','+tempColor.s+', '+tempColor.v+')';
-            document.getElementById('shadow').value = tinycolor(tempColor).toHexString();
-            document.getElementById('shadow').style.backgroundColor = tinycolor(tempColor).toHexString();
+            //Decrease value
+            var value = shadowSwatch.hsv[2] - 15;
+            if(value < 0) value = 0;
+            shadowSwatch.fromHSV(hue, saturation, value);
             
+            console.log(shadowSwatch.toHEXString());
+            document.getElementById('shadow').value = shadowSwatch.toHEXString();
+            document.getElementById('shadow').style.backgroundColor = shadowSwatch.toHEXString();
+            colorInput.jscolor.fromString(currentColor);
+    
             
-            //Set new highlight color
-            tempColor = tinycolor(color).toHsv();
+            //Create Highlight swatch
+            var highlightSwatch = colorInput.jscolor;
             
             //Increase hue
-            tempColor.h += 5;
-            if(tempColor.h > 359) tempColor.h = 359;
-            
-            //Increase lightness/value
-            tempColor.v += (15/100);
-            if(tempColor.v > 1) tempColor.v = 1;
+            hue = highlightSwatch.hsv[0] + 5;
+            if(hue > 360) hue = 360;
             
             //Decrease saturation
-            tempColor.s -= (10/100);
-            if(tempColor.s < 0) tempColor.s = 0;
+            saturation = highlightSwatch.hsv[1] - 5;
+            if(saturation < 0) saturation = 0;
             
-            tempColor = 'hsv('+tempColor.h+','+tempColor.s+', '+tempColor.v+')';
-            document.getElementById('highlight').value = tinycolor(tempColor).toHexString();
-            document.getElementById('highlight').style.backgroundColor = tinycolor(tempColor).toHexString();
+            //Increase value
+            value = highlightSwatch.hsv[2] + 15;
+            if(value > 100) value = 100;
+            highlightSwatch.fromHSV(hue, saturation, value);
+            
+            console.log(highlightSwatch.toHEXString());
+            document.getElementById('highlight').value = highlightSwatch.toHEXString();
+            document.getElementById('highlight').style.backgroundColor = highlightSwatch.toHEXString();
+            colorInput.jscolor.fromString(currentColor);
 
             
             socket.emit("addSwatch", {newColor: currentColor});
@@ -404,7 +416,7 @@
         
     
     </script>
-    <script src="http://jscolor.com/release/2.0/jscolor-2.0.4/jscolor.js"></script>
+    
 </head>
 <body>
     <canvas width="1000" height="645" style="cursor: default; ">
