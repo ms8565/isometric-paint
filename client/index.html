@@ -242,9 +242,17 @@
         }
         
         const undoAction = () => {
-            var lastAction = lastActions.pop();
-            undoneActions.push(lastAction);
+            //var lastAction = lastActions.pop();
+            //undoneActions.push(lastAction);
             //update(lastAction);
+            
+            
+            let testTris = triangles;
+            for(var i = 0; i < triangles.length; i++){
+                testTris[i].setColor('#ff000f');
+            }
+            
+            socket.emit("undoAction", {testTri: testTris});
         }
         
         const redoAction = () => {
@@ -268,6 +276,8 @@
             //Update canvas using the new data (the other user's array)
             //Fill triangles in with new colors
             let changedTriangles = [];
+            console.log("Size of triangles: "+data.triangles.length);
+            
             
             for(var i = 0; i < data.triangles.length; i++){
                 triangles[data.triangles[i].id].setColor(data.triangles[i].color);
@@ -354,7 +364,6 @@
             dragging = true;
             
             var changedTriangles = [];
-            var pastTriangles = [];
             
             //Check if mouse is in triangles
             for(var i = 0; i < triangles.length; i++){
@@ -365,14 +374,13 @@
                         colorInput.jscolor.fromString(colorString);
                         updateColor();
                     }
-                    pastTriangles.push(triangles[i]);
                     triangles[i].setColor(currentColor);
                     changedTriangles.push(triangles[i]);
+                    socket.emit("pushAction", {triangles: changedTriangles});
                 }
             }
-            lastActions.push(pastTriangles);
             
-            update(changedTriangles);
+            if(changedTriangles.length != 0) update(changedTriangles);
         };
         const onMouseUp = (e) => {
             dragging = false;
@@ -389,15 +397,14 @@
                 mouse.y = e.pageY - e.target.offsetTop;
 
                 var changedTriangles = [];
-                var pastTriangles = [];
 
                 //check if mouse is in triangles
                 for(var i = 0; i < triangles.length; i++){
                     if(triangles[i].containsPoint(mouse.x, mouse.y)){ 
                         if(dragging){
-                            pastTriangles.push(triangles[i]);
                             triangles[i].setColor(currentColor);
                             changedTriangles.push(triangles[i]);
+                            socket.emit("pushAction", {triangles: changedTriangles});
                         }
                         else{
                             if(triangles[i].id != highlightTri.id){
@@ -415,17 +422,14 @@
                         }
                     }
                 }
-                pastTriangles.push(triangles[i]);
-                lastActions.push(pastTriangles);
                 
-                update(changedTriangles);
+                if(changedTriangles.length != 0) update(changedTriangles);
             }
             
         };
         
         const update = (changedTriangles) => {
         //update is called after a triangle is interacted with
-            
             //send the server the array of triangles
             socket.emit("draw", {triangles: changedTriangles});
         };
