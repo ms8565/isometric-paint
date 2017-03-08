@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
+    <script src="http://bgrins.github.io/TinyColor/tinycolor.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
     <script type="text/babel" >
@@ -160,6 +160,11 @@
             var clearBtn = document.getElementById('clear-btn');
             clearBtn.addEventListener("click",clearCanvas);
             
+            var shadowSwatch = document.getElementById('shadow');
+            shadowSwatch.addEventListener("click",function(){
+                
+            });
+            
             socket = io.connect();
             setupSocket();
             setupCanvas();
@@ -167,8 +172,51 @@
         };
         window.onload = init;
         
-        const updateColor = (color) => {
+        const updateColor = () => {
             currentColor = "#"+colorInput.jscolor;
+            
+            //var shadowBtn = document.getElementById('shadow-btn');
+           // shadowBtn = 
+                
+            var color = document.getElementById('color-input').value;
+            color = color.toLowerCase();
+            
+            //Set new shadow color
+            var tempColor = tinycolor(color).toHsv();
+            
+            //Decrease hue
+            tempColor.h-= 5;
+            if(tempColor.h < 0) tempColor.h = 0;
+            
+            //Decrease brightness/value
+            tempColor.v-= (15/100);
+            if(tempColor.v < 0) tempColor.v = 0;
+            
+            tempColor = 'hsv('+tempColor.h+','+tempColor.s+', '+tempColor.v+')';
+            document.getElementById('shadow').value = tinycolor(tempColor).toHexString();
+            document.getElementById('shadow').style.backgroundColor = tinycolor(tempColor).toHexString();
+            
+            
+            //Set new highlight color
+            tempColor = tinycolor(color).toHsv();
+            
+            //Increase hue
+            tempColor.h += 5;
+            if(tempColor.h > 359) tempColor.h = 359;
+            
+            //Increase lightness/value
+            tempColor.v += (15/100);
+            if(tempColor.v > 1) tempColor.v = 1;
+            
+            //Decrease saturation
+            tempColor.s -= (10/100);
+            if(tempColor.s < 0) tempColor.s = 0;
+            
+            tempColor = 'hsv('+tempColor.h+','+tempColor.s+', '+tempColor.v+')';
+            document.getElementById('highlight').value = tinycolor(tempColor).toHexString();
+            document.getElementById('highlight').style.backgroundColor = tinycolor(tempColor).toHexString();
+
+            
             socket.emit("addSwatch", {newColor: currentColor});
         };
         
@@ -371,19 +419,22 @@
     <p>
         <input id="save-btn" type="button" value="Save">
     </p>
-    <p id="color-picker">
         <div id="swatches">
-            <div id="swatch-box0" style="width: 20px; height:10px; background-color:blue;"></div>
-            <div id="swatch-box1" style="width: 20px; height:10px; background-color:blue;"></div>
-            <div id="swatch-box2" style="width: 20px; height:10px; background-color:blue;"></div>
-            <div id="swatch-box3" style="width: 20px; height:10px; background-color:blue;"></div>
-            <div id="swatch-box4" style="width: 20px; height:10px; background-color:blue;"></div>
-            <div id="swatch-box5" style="width: 20px; height:10px; background-color:blue;"></div>
-            <div id="swatch-box6" style="width: 20px; height:10px; background-color:blue;"></div>
-            <div id="swatch-box7" style="width: 20px; height:10px; background-color:blue;"></div>
+            <button id="swatch-box0" style="width: 25px; height:25px; background-color:blue;"></button>
+            <button id="swatch-box1" style="width: 25px; height:25px; background-color:blue;"></button>
+            <button id="swatch-box2" style="width: 25px; height:25px; background-color:blue;"></button>
+            <button id="swatch-box3" style="width: 25px; height:25px; background-color:blue;"></button>
+            <button id="swatch-box4" style="width: 25px; height:25px; background-color:blue;"></button>
+            <button id="swatch-box5" style="width: 25px; height:25px; background-color:blue;"></button>
+            <button id="swatch-box6" style="width: 25px; height:25px; background-color:blue;"></button>
+            <button id="swatch-box7" style="width: 25px; height:25px; background-color:blue;"></button>
             
         </div>
-        <input id="color-input" class="jscolor" value="cc66ff" style="width:50px; height:20px;"/>
+    
+    <p>
+        <button id="highlight" style="width: 25px; height:25px; background-color:white;"></button>
+        <input id="color-input" class="jscolor" value="cc66ff" style="width:50px; height:20px;">
+        <button id="shadow" style="width: 25px; height:25px; background-color:black;"></button>
     </p>
 </body>
 </html>
