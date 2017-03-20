@@ -45,9 +45,9 @@ class Room {
     this.currentTriangles = [];
     this.currentColors = currentColors;
   }
-  addUser(socket) {
-    const sock = socket;
-    sock.join(this.name);
+  addUser(sock) {
+    const socket = sock;
+    socket.join(this.name);
     this.numUsers += 1;
 
     if (this.firstUser) {
@@ -99,14 +99,11 @@ class Room {
 
 }
 
-const testRoom = new Room('room1');
-rooms[testRoom.name] = testRoom;
-
 const onJoined = (sock) => {
   const socket = sock;
 
   socket.on('join', () => {
-    socket.join('room1');
+    //socket.join('room1');
   });
     
     socket.on('checkJoin', (data) => {
@@ -121,28 +118,21 @@ const onJoined = (sock) => {
     socket.on('checkCreate', (data) => {
      if (!(data.roomName in rooms)) {
        rooms[data.roomName] = new Room(data.roomName);
-
        socket.roomName = data.roomName;
+    
+       rooms[socket.roomName].addUser(socket);
        socket.emit('joinRoom', { roomName: data.roomName });
      } else {
        socket.emit('denyRoom', { message: 'Room already exists' });
      }
     });
-
-//  if (firstUser) {
-//    socket.emit('setupFirstCanvas', null);
-//    firstUser = false;
-//  } else {
-//    socket.emit('updateCanvas', { triangles: currentTriangles });
-//  }
-//  socket.emit('updateSwatches', { swatches: currentColors });
 };
 
 const onDisconnect = (sock) => {
   const socket = sock;
 
   socket.on('disconnect', () => {
-    socket.leave('room1');
+    rooms[socket.roomName].removeUser(socket);
   });
 };
 
@@ -150,10 +140,7 @@ const onDraw = (sock) => {
   const socket = sock;
 
   socket.on('draw', (data) => {
-    for (let i = 0; i < data.triangles.length; i += 1) {
-      currentTriangles[data.triangles[i].id] = data.triangles[i];
-    }
-    io.sockets.in('room1').emit('updateCanvas', data);
+      rooms[socket.roomName].draw(data);
   });
 };
 
@@ -164,18 +151,7 @@ const onUpdate = (sock) => {
     currentTriangles = data.triangles;
   });*/
   socket.on('addSwatch', (data) => {
-    const colorIndex = currentColors.indexOf(data.newColor);
-    // Check if color is already in the array
-    if (colorIndex !== -1) {
-      // If it is, move it to the front
-      currentColors.unshift(currentColors.splice(colorIndex, 1)[0]);
-    } else {
-      // If it isn't, insert it and pop the last value
-      currentColors.unshift(data.newColor);
-      currentColors.pop();
-    }
-
-    io.sockets.in('room1').emit('updateSwatches', { swatches: currentColors });
+    rooms[socket.roomName].addSwatch(data);
   });
   socket.on('pushAction', () => {
     console.log('pushing actions');
@@ -195,7 +171,7 @@ const onUpdate = (sock) => {
 //            currentTriangles[i] = data.testTri[i];
 //        }
 
-      io.sockets.in('room1').emit('updateCanvas', { triangles: currentTriangles });
+      //io.sockets.in('room1').emit('updateCanvas', { triangles: currentTriangles });
     } else {
       console.log('No actions in the list');
     }
