@@ -54,7 +54,7 @@ class Room {
       socket.emit('setupFirstCanvas', null);
       this.firstUser = false;
     } else {
-      socket.emit('updateCanvas', { triangles: currentTriangles });
+      socket.emit('updateCanvas', { triangles: this.currentTriangles });
     }
   }
   removeUser(socket) {
@@ -76,7 +76,7 @@ class Room {
       this.currentColors.unshift(data.newColor);
       this.currentColors.pop();
     }
-    io.sockets.in(this.name).emit('updateSwatches', { swatches: currentColors });
+    io.sockets.in(this.name).emit('updateSwatches', { swatches: this.currentColors });
   }
   updateTriangles(data) {
     this.currentTriangles = data.triangles;
@@ -108,14 +108,34 @@ const onJoined = (sock) => {
   socket.on('join', () => {
     socket.join('room1');
   });
+    
+    socket.on('checkJoin', (data) => {
+     if (data.roomName in rooms) {
+         socket.roomName = data.roomName;
+         rooms[socket.roomName].addUser(socket);
+         socket.emit('joinRoom', { roomName: data.roomName });
+     } else {
+       socket.emit('denyRoom', { message: 'Room does not exist' });
+     }
+    });
+    socket.on('checkCreate', (data) => {
+     if (!(data.roomName in rooms)) {
+       rooms[data.roomName] = new Room(data.roomName);
 
-  if (firstUser) {
-    socket.emit('setupFirstCanvas', null);
-    firstUser = false;
-  } else {
-    socket.emit('updateCanvas', { triangles: currentTriangles });
-  }
-  socket.emit('updateSwatches', { swatches: currentColors });
+       socket.roomName = data.roomName;
+       socket.emit('joinRoom', { roomName: data.roomName });
+     } else {
+       socket.emit('denyRoom', { message: 'Room already exists' });
+     }
+    });
+
+//  if (firstUser) {
+//    socket.emit('setupFirstCanvas', null);
+//    firstUser = false;
+//  } else {
+//    socket.emit('updateCanvas', { triangles: currentTriangles });
+//  }
+//  socket.emit('updateSwatches', { swatches: currentColors });
 };
 
 const onDisconnect = (sock) => {

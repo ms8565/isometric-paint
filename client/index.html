@@ -115,58 +115,64 @@
             canvas = document.querySelector('canvas');
             ctx = canvas.getContext('2d');
             
-            canvas.onmousedown = onMouseDown;
-            canvas.onmouseup = onMouseUp;
-            canvas.onmousemove = onMouseMove;
-            canvas.onmouseout = onMouseOut;
+            const join = document.querySelector("#join");
+            join.addEventListener('click', checkJoinRoom);
             
-            colorInput = document.getElementById('color-input');
-            colorInput.addEventListener("change",updateColor);
-            currentColor = "#"+colorInput.jscolor;
-            
-            var linesBtn = document.getElementById('lines-toggle');
-            linesBtn.addEventListener("click",toggleLines);
-            
-            var saveBtn = document.getElementById('save-btn');
-            saveBtn.addEventListener("click",saveCanvas);
-            
-            var clearBtn = document.getElementById('clear-btn');
-            clearBtn.addEventListener("click",clearCanvas);
-            
-            var eyedropperBtn = document.getElementById('eyedropper-btn');
-            eyedropperBtn.addEventListener("click",toggleEyedropper);
-            
-            var undoBtn = document.getElementById('undo-btn');
-            undoBtn.addEventListener("click",undoAction);
-            
-            var redoBtn = document.getElementById('redo-btn');
-            redoBtn.addEventListener("click",redoAction);
-            
-            var shadowSwatch = document.getElementById('shadow');
-            shadowSwatch.addEventListener("click",function(){
-                colorInput.jscolor.fromString(this.value);
-                updateColor();
-            });
-            
-            var highlightSwatch = document.getElementById('highlight');
-            highlightSwatch.addEventListener("click",function(){
-                colorInput.jscolor.fromString(this.value);
-                updateColor();
-            });
-            
-            for(var i = 0; i < 8; i++){
-                var swatch = document.getElementById('swatch-box'+i);
-                
-                swatch.addEventListener("click",function(){
-                    colorInput.jscolor.fromString(this.value);
-                    updateColor();
-                });
-            }
+            const create = document.querySelector("#create");
+            create.addEventListener('click', checkCreateRoom);
+//            
+//            canvas.onmousedown = onMouseDown;
+//            canvas.onmouseup = onMouseUp;
+//            canvas.onmousemove = onMouseMove;
+//            canvas.onmouseout = onMouseOut;
+//            
+//            colorInput = document.getElementById('color-input');
+//            colorInput.addEventListener("change",updateColor);
+//            currentColor = "#"+colorInput.jscolor;
+//            
+//            var linesBtn = document.getElementById('lines-toggle');
+//            linesBtn.addEventListener("click",toggleLines);
+//            
+//            var saveBtn = document.getElementById('save-btn');
+//            saveBtn.addEventListener("click",saveCanvas);
+//            
+//            var clearBtn = document.getElementById('clear-btn');
+//            clearBtn.addEventListener("click",clearCanvas);
+//            
+//            var eyedropperBtn = document.getElementById('eyedropper-btn');
+//            eyedropperBtn.addEventListener("click",toggleEyedropper);
+//            
+//            var undoBtn = document.getElementById('undo-btn');
+//            undoBtn.addEventListener("click",undoAction);
+//            
+//            var redoBtn = document.getElementById('redo-btn');
+//            redoBtn.addEventListener("click",redoAction);
+//            
+//            var shadowSwatch = document.getElementById('shadow');
+//            shadowSwatch.addEventListener("click",function(){
+//                colorInput.jscolor.fromString(this.value);
+//                updateColor();
+//            });
+//            
+//            var highlightSwatch = document.getElementById('highlight');
+//            highlightSwatch.addEventListener("click",function(){
+//                colorInput.jscolor.fromString(this.value);
+//                updateColor();
+//            });
+//            
+//            for(var i = 0; i < 8; i++){
+//                var swatch = document.getElementById('swatch-box'+i);
+//                
+//                swatch.addEventListener("click",function(){
+//                    colorInput.jscolor.fromString(this.value);
+//                    updateColor();
+//                });
+//            }
             
             socket = io.connect();
             setupSocket();
-            setupCanvas();
-            updateColor();
+            //setupTriangles();
+            //updateColor();
             
         };
         window.onload = init;
@@ -276,7 +282,6 @@
             //Update canvas using the new data (the other user's array)
             //Fill triangles in with new colors
             let changedTriangles = [];
-            console.log("Size of triangles: "+data.triangles.length);
             
             
             for(var i = 0; i < data.triangles.length; i++){
@@ -290,8 +295,76 @@
              socket.on('connect', () => {
                 socket.emit('join', null);
             });
+            socket.on('joinRoom', (data) => {
+                setupCanvas();
+				socket.roomName = data.roomName;
+            });
+            socket.on('denyRoom', (data) => {
+                let errorText = document.querySelector("#error-text");
+                errorText.innerHTML = data.message;
+            });
+
+        };
+
+        const setupCanvas = (e) => {
+            canvas = document.querySelector('canvas');
+            ctx = canvas.getContext('2d');
+            
+            canvas.onmousedown = onMouseDown;
+            canvas.onmouseup = onMouseUp;
+            canvas.onmousemove = onMouseMove;
+            canvas.onmouseout = onMouseOut;
+            
+            colorInput = document.getElementById('color-input');
+            colorInput.addEventListener("change",updateColor);
+            currentColor = "#"+colorInput.jscolor;
+            
+            var linesBtn = document.getElementById('lines-toggle');
+            linesBtn.addEventListener("click",toggleLines);
+            
+            var saveBtn = document.getElementById('save-btn');
+            saveBtn.addEventListener("click",saveCanvas);
+            
+            var clearBtn = document.getElementById('clear-btn');
+            clearBtn.addEventListener("click",clearCanvas);
+            
+            var eyedropperBtn = document.getElementById('eyedropper-btn');
+            eyedropperBtn.addEventListener("click",toggleEyedropper);
+            
+            var undoBtn = document.getElementById('undo-btn');
+            undoBtn.addEventListener("click",undoAction);
+            
+            var redoBtn = document.getElementById('redo-btn');
+            redoBtn.addEventListener("click",redoAction);
+            
+            var shadowSwatch = document.getElementById('shadow');
+            shadowSwatch.addEventListener("click",function(){
+                colorInput.jscolor.fromString(this.value);
+                updateColor();
+            });
+            
+            var highlightSwatch = document.getElementById('highlight');
+            highlightSwatch.addEventListener("click",function(){
+                colorInput.jscolor.fromString(this.value);
+                updateColor();
+            });
+            
+            for(var i = 0; i < 8; i++){
+                var swatch = document.getElementById('swatch-box'+i);
+                
+                swatch.addEventListener("click",function(){
+                    colorInput.jscolor.fromString(this.value);
+                    updateColor();
+                });
+            }
+            setupTriangles();
+            updateColor();
+            document.getElementById('creation-container').style.display = 'none';
+            document.getElementById('paint-container').style.display = 'block';
+            
             socket.on('updateCanvas', (data) => {
                 handleMessage(data);
+                console.log('updateCanvas');
             });
             socket.on('setupFirstCanvas', (data) => {
                socket.emit("updateTriangles", {triangles: triangles});
@@ -303,9 +376,9 @@
                    swatch.style.backgroundColor = data.swatches[i];
                }
             });
-
         };
-        const setupCanvas = (e) => {
+
+        const setupTriangles = (e) => {
             //create the array of triangles
             //populate array with right facing triangles
             var idNum = 0;
@@ -355,6 +428,15 @@
             highlightTri = triangles[0];
             
         };
+
+        const checkJoinRoom = () => {
+            let roomInput = document.querySelector("#room-input").value;
+            socket.emit('checkJoin', { roomName: roomInput });
+        }
+        const checkCreateRoom = () => {
+            let roomInput = document.querySelector("#room-input").value;
+            socket.emit('checkCreate', { roomName: roomInput });
+        }
         
         const onMouseDown = (e) => {
             var mouse = {};
@@ -454,41 +536,54 @@
     
 </head>
 <body>
-    <canvas width="1000" height="645" style="cursor: default; ">
-		Your browser does not support Canvas
-	</canvas>
-    <p>
-        <input id="lines-toggle" type="button" value="Toggle Lines">
-    </p>
-    <p>
-        <input id="clear-btn" type="button" value="Clear">
-    </p>
-    <p>
-        <input id="save-btn" type="button" value="Save">
-    </p>
-    <p>
-        <input id="undo-btn" type="button" value="Undo">
-        <input id="redo-btn" type="button" value="Redo">
-    </p>
-    <p>
-        <input id="eyedropper-btn" type="button" value="Pick Color">
-    </p>
-        <div id="swatches">
-            <button id="swatch-box0" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-            <button id="swatch-box1" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-            <button id="swatch-box2" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-            <button id="swatch-box3" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-            <button id="swatch-box4" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-            <button id="swatch-box5" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-            <button id="swatch-box6" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-            <button id="swatch-box7" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-            
-        </div>
+    <div id="creation-container">
+        <label for="room-name">Room Name:</label>
+        <input id="room-input" name="room-name" type="text" />
+        <input type="button" id="join" value='Join Room'/>
+        <input type="button" id="create" value='Create Room'/>
+        <p id="error-text" style="color: #bf1e1e"></p>
+    </div>
     
-    <p>
-        <button id="highlight" style="width: 25px; height:25px; background-color:white;"></button>
-        <input type="button" id="color-input" class="jscolor {closable:true,closeText:'Close'}" value="cc66ff" style="width:50px; height:20px;">
-        <button id="shadow" style="width: 25px; height:25px; background-color:black;"></button>
-    </p>
+    <div id = "paint-container" style="display:none;">
+        <canvas width="1000" height="645" style="cursor: default; ">
+            Your browser does not support Canvas
+        </canvas>
+        
+        <div id="controls">
+            <p>
+                <input id="lines-toggle" type="button" value="Toggle Lines">
+            </p>
+            <p>
+                <input id="clear-btn" type="button" value="Clear">
+            </p>
+            <p>
+                <input id="save-btn" type="button" value="Save">
+            </p>
+            <p>
+                <input id="undo-btn" type="button" value="Undo">
+                <input id="redo-btn" type="button" value="Redo">
+            </p>
+            <p>
+                <input id="eyedropper-btn" type="button" value="Pick Color">
+            </p>
+                <div id="swatches">
+                    <button id="swatch-box0" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+                    <button id="swatch-box1" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+                    <button id="swatch-box2" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+                    <button id="swatch-box3" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+                    <button id="swatch-box4" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+                    <button id="swatch-box5" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+                    <button id="swatch-box6" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+                    <button id="swatch-box7" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+
+                </div>
+
+            <p>
+                <button id="highlight" style="width: 25px; height:25px; background-color:white;"></button>
+                <input type="button" id="color-input" class="jscolor {closable:true,closeText:'Close'}" value="cc66ff" style="width:50px; height:20px;">
+                <button id="shadow" style="width: 25px; height:25px; background-color:black;"></button>
+            </p>
+        </div>
+    </div>
 </body>
 </html>
