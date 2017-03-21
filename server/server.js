@@ -31,7 +31,6 @@ const currentColors = ['#0f0000',
 const lastActions = [];
 const undoneActions = [];
 
-const firstUser = true;
 const rooms = {};
 
 class Room {
@@ -132,7 +131,7 @@ const onDisconnect = (sock) => {
   const socket = sock;
 
   socket.on('disconnect', () => {
-    console.log("check disconnect");
+    console.log('check disconnect');
     rooms[socket.roomName].removeUser(socket);
   });
 };
