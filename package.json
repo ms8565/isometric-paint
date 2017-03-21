@@ -1,13 +1,13 @@
 {
   "name": "isometric-paint",
   "version": "1.0.0",
-   "engines": {
+  "engines": {
     "node": "6.5.0"
   },
   "description": "Isometric Paint",
   "main": "index.js",
   "scripts": {
-    "start": "node ./src/server.js",
+    "start": "node ./server/server.js",
     "pretest": "eslint ./src --fix",
     "test": "echo test complete"
   },
@@ -19,6 +19,7 @@
     "eslint-plugin-import": "^2.0.0"
   },
   "dependencies": {
+    "express": "^4.15.2",
     "socket.io": "^1.4.8"
   }
 }
