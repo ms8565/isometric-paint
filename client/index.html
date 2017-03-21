@@ -8,7 +8,6 @@
         "use strict";
         let socket;
         
-        let draws = {};
         let triangles = [];
         let lastColors = [];
         let highlightTri;
@@ -120,54 +119,6 @@
             
             const create = document.querySelector("#create");
             create.addEventListener('click', checkCreateRoom);
-//            
-//            canvas.onmousedown = onMouseDown;
-//            canvas.onmouseup = onMouseUp;
-//            canvas.onmousemove = onMouseMove;
-//            canvas.onmouseout = onMouseOut;
-//            
-//            colorInput = document.getElementById('color-input');
-//            colorInput.addEventListener("change",updateColor);
-//            currentColor = "#"+colorInput.jscolor;
-//            
-//            var linesBtn = document.getElementById('lines-toggle');
-//            linesBtn.addEventListener("click",toggleLines);
-//            
-//            var saveBtn = document.getElementById('save-btn');
-//            saveBtn.addEventListener("click",saveCanvas);
-//            
-//            var clearBtn = document.getElementById('clear-btn');
-//            clearBtn.addEventListener("click",clearCanvas);
-//            
-//            var eyedropperBtn = document.getElementById('eyedropper-btn');
-//            eyedropperBtn.addEventListener("click",toggleEyedropper);
-//            
-//            var undoBtn = document.getElementById('undo-btn');
-//            undoBtn.addEventListener("click",undoAction);
-//            
-//            var redoBtn = document.getElementById('redo-btn');
-//            redoBtn.addEventListener("click",redoAction);
-//            
-//            var shadowSwatch = document.getElementById('shadow');
-//            shadowSwatch.addEventListener("click",function(){
-//                colorInput.jscolor.fromString(this.value);
-//                updateColor();
-//            });
-//            
-//            var highlightSwatch = document.getElementById('highlight');
-//            highlightSwatch.addEventListener("click",function(){
-//                colorInput.jscolor.fromString(this.value);
-//                updateColor();
-//            });
-//            
-//            for(var i = 0; i < 8; i++){
-//                var swatch = document.getElementById('swatch-box'+i);
-//                
-//                swatch.addEventListener("click",function(){
-//                    colorInput.jscolor.fromString(this.value);
-//                    updateColor();
-//                });
-//            }
             
             socket = io.connect();
             setupSocket();
@@ -357,16 +308,12 @@
                     updateColor();
                 });
             }
-            setupTriangles();
-            updateColor();
-            document.getElementById('creation-container').style.display = 'none';
-            document.getElementById('paint-container').style.display = 'block';
             
             socket.on('updateCanvas', (data) => {
                 handleMessage(data);
-                console.log('updateCanvas');
             });
             socket.on('setupFirstCanvas', (data) => {
+               clearCanvas();
                socket.emit("updateTriangles", {triangles: triangles});
             });
             socket.on('updateSwatches', (data) => {
@@ -376,6 +323,12 @@
                    swatch.style.backgroundColor = data.swatches[i];
                }
             });
+            
+            setupTriangles();
+            updateColor();
+            socket.emit("initializeTriangles", null);
+            document.getElementById('creation-container').style.display = 'none';
+            document.getElementById('paint-container').style.display = 'block';
         };
 
         const setupTriangles = (e) => {
@@ -536,7 +489,7 @@
     
 </head>
 <body>
-    <div id="creation-container">
+    <div id="creation-container" style="float:right;">
         <label for="room-name">Room Name:</label>
         <input id="room-input" name="room-name" type="text" />
         <input type="button" id="join" value='Join Room'/>
