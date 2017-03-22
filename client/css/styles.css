@@ -1,0 +1,11 @@
+body{
+    font-family: "Arial", sans-serif;
+}
+
+#controls{
+    padding-left: 1em;
+    padding-right: 1em;
+    float: left; 
+    background-color: #D4D4D4;
+    height: 645px;
+}
