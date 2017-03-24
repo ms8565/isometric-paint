@@ -1,16 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="http://jscolor.com/release/2.0/jscolor-2.0.4/jscolor.js"></script>
+    <title>Isometric Paint</title>
+    <link rel="icon" href="/assets/media/icon.png">
+    
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
     
     <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
+
+    <!--JSColor for color picker-->
+    <script src="http://jscolor.com/release/2.0/jscolor-2.0.4/jscolor.js"></script>
     
+    <!--JQuery for Tooltips-->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    
+    <!--Javascript for Client-->
     <script src="/assets/js/sidebar.js"></script>
     <script src="/assets/js/triangle.js"></script>
     <script src="/assets/js/canvas.js"></script>
     <script src="/assets/js/main.js"></script>
+    
 </head>
 <body>
     <div id="creation-container">
@@ -22,26 +34,28 @@
     </div>
     
     <div id = "paint-container" style="display:none;">
-        <canvas width="1000" height="645" style="cursor: default; ">
-            Your browser does not support Canvas
-        </canvas>
-        
+        <p>
+            <input id="save-btn" type="button" value="Save" title="Download your image">
+        </p>
         <div id="controls">
             <p>
-                <input id="lines-toggle" type="button" value="Toggle Lines">
+                <input type="checkbox" id="tooltips-toggle" value="tooltips-checkbox" checked/>
+                <label for="tooltips-toggle">Show Tooltips</label>
             </p>
             <p>
-                <input id="clear-btn" type="button" value="Clear">
+                <input id="lines-toggle" type="button" value="Toggle Lines" title="Toggle triangle outlines on and off">
             </p>
             <p>
-                <input id="save-btn" type="button" value="Save">
+                <input id="clear-btn" type="button" value="Clear" title="Clear all triangles">
             </p>
+            
             <p>
                 <input id="undo-btn" type="button" value="Undo">
                 <input id="redo-btn" type="button" value="Redo">
             </p>
             <p>
-                <input id="eyedropper-btn" type="button" value="Pick Color">
+                <input id="eyedropper-btn" type="button" value="Pick Color" title="Pick a color from another triangle">
+                <button id="erase-btn" value="#ffffff" style="width: 25px; height:25px; background-color:white;" title="Erase triangles"></button>
             </p>
                 <div id="swatches">
                     <button id="swatch-box0" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
@@ -62,9 +76,12 @@
                 <button id="highlight" style="width: 25px; height:25px; background-color:white;"></button>
                 <button id="shadow" style="width: 25px; height:25px; background-color:black;"></button>
                 <br/>
-                <input type="button" id="color-input" class="jscolor {closable:true,closeText:'Close'}" value="cc66ff" style="width:50px; height:20px;">
+                <input type="button" id="color-input" class="jscolor {closable:true,closeText:'Close'}" value="cc66ff" style="width:50px; height:20px;" title="Choose a color from the color picker">
             </p>
         </div>
+        <canvas width="1000" height="645" style="cursor: default; ">
+            Your browser does not support Canvas
+        </canvas>
     </div>
 </body>
 </html>

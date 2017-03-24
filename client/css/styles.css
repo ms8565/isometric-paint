@@ -9,3 +9,9 @@ body{
     background-color: #D4D4D4;
     height: 645px;
 }
+
+#paint-container{
+    padding-right: .25em;
+    padding-left: .25em;
+    background-color: grey;
+}

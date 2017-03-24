@@ -5,12 +5,16 @@ const setupControls = () => {
     colorInput = document.getElementById('color-input');
     colorInput.addEventListener("change",updateColor);
     currentColor = "#"+colorInput.jscolor;
+    
+    var tooltipsCheck = document.getElementById('tooltips-toggle')
+    tooltipsCheck.addEventListener("click", toggleTooltips);
 
     var linesBtn = document.getElementById('lines-toggle');
     linesBtn.addEventListener("click",toggleLines);
 
     var saveBtn = document.getElementById('save-btn');
     saveBtn.addEventListener("click",saveCanvas);
+    $('save-btn').tooltip();
 
     var clearBtn = document.getElementById('clear-btn');
     clearBtn.addEventListener("click",clearCanvas);
@@ -23,6 +27,12 @@ const setupControls = () => {
 
     var redoBtn = document.getElementById('redo-btn');
     redoBtn.addEventListener("click",redoAction);
+    
+    var eraseBtn = document.getElementById('erase-btn');
+    eraseBtn.addEventListener("click",function(){
+        colorInput.jscolor.fromString("#ffffff");
+        updateColor();
+    });
 
     var shadowSwatch = document.getElementById('shadow');
     shadowSwatch.addEventListener("click",function(){
@@ -44,6 +54,14 @@ const setupControls = () => {
             updateColor();
         });
     }
+    
+    //Initialize all JQuery tooltips
+    $('#lines-toggle').tooltip();
+    $('#save-btn').tooltip();
+    $('#eyedropper-btn').tooltip();
+    $('#clear-btn').tooltip();
+    $('#erase-btn').tooltip();
+    $('#color-input').tooltip();
     
     socket.on('updateSwatches', (data) => {
        for(var i = 0; i < data.swatches.length; i++){
@@ -67,6 +85,22 @@ const saveCanvas = () => {
     var image = canvas.toDataURL("image/png");
     window.open(image);
 };
+
+const toggleTooltips = () => {
+    let action;
+    if(document.getElementById('tooltips-toggle').checked){
+        action = "enable";
+    }
+    else{
+        action = "disable";
+    }
+    $('#lines-toggle').tooltip(action);
+    $('#save-btn').tooltip(action);
+    $('#eyedropper-btn').tooltip(action);
+    $('#clear-btn').tooltip(action);
+    $('#erase-btn').tooltip(action);
+    $('#color-input').tooltip(action);
+}
 
 const toggleLines = () => {
     linesOn = !linesOn;

@@ -57,7 +57,7 @@ const setupApp = (e) => {
     
     socket.emit("initializeTriangles", null);
     document.getElementById('creation-container').style.display = 'none';
-    document.getElementById('paint-container').style.display = 'block';
+    document.getElementById('paint-container').style.display = 'inline-block';
 };
 
 const checkJoinRoom = () => {
