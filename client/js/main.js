@@ -48,7 +48,6 @@ const setupSocket = (e) => {
         let errorText = document.querySelector("#error-text");
         errorText.innerHTML = data.message;
     });
-
 };
 
 const setupApp = (e) => {

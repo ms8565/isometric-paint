@@ -31,8 +31,14 @@
     
 </head>
 <body>
+    <div class="center">
+    <div id="nav-bar">
+        <div class="drop-down" style="background-image: url(/assets/media/drawBar.png);"></div>
+        <div class="drop-down" style="background-image: url(/assets/media/aboutBar.png);"></div>
+        <div class="drop-down" style="background-image: url(/assets/media/morebar.png);"></div>
+    </div>
     <div id="creation-container">
-        <label for="room-name">Room Name:</label>
+        <label id="room-label" for="room-name">Room Name:</label>
         <input id="room-input" name="room-name" type="text" />
         <input type="button" id="join" value='Join Room'/>
         <input type="button" id="create" value='Create Room'/>
@@ -40,55 +46,56 @@
     </div>
     
     <div id = "paint-container" style="display:none;">
-        <p>
-            <input type="checkbox" id="tooltips-toggle" value="tooltips-checkbox" checked>
-            <label for="tooltips-toggle">Show Tooltips</label>
+        <div id="top-bar">
             
-            <button id="save-btn" value=" " title="Download your image">
-                <span class="glyphicon glyphicon-floppy-save"></span>
-            </button>
+            <button id="save-btn" class="large-btn" style="height: 40px" value=" " title="Download your image"></button>
             
-            <button id="clear-btn" value=" " title="Clear all triangles"></button>
-            
+            <button id="clear-btn" class="large-btn" value=" " title="Clear all triangles"></button>
             <div id="clear-dialog" title="Erase Everything?" style="display:none">
                 <p>Are you sure you want to clear the whole screen? You wouldn't want to erase anyone else's hard work.</p>
             </div>
-        </p>
+            
+            <div class="check-container">
+                <input type="checkbox" id="tooltips-toggle" value="tooltips-checkbox" checked>
+                <label for="tooltips-toggle">Show Tooltips</label>
+            </div>
+            
+        </div>
         <div id="controls">
             <button id="lines-toggle" class="large-btn" value=" " title="Toggle triangle outlines on and off"></button>
-            <br/>
-            <button id="eyedropper-btn" class="large-btn" value="Pick Color" title="Pick a color from another triangle">
-                <i class="material-icons">colorize</i>
-            </button>
-            <br/>
-            <button id="erase-btn" class="large-btn" value="#ffffff" title="Erase triangles">
-                <span class="glyphicon glyphicon-erase"></span>
-            </button>
+            <button id="eyedropper-btn" class="large-btn" value="Pick Color" title="Pick a color from another triangle"></button>
+            <button id="erase-btn" class="large-btn" value="#ffffff" title="Erase triangles"></button>
             <div id="swatches">
-                <button id="swatch-box0" class="small-btn" value="#ffffff"></button>
-                <button id="swatch-box1" class="small-btn" value="#ffffff"></button>
-                <br/>
-                <button id="swatch-box2" class="small-btn" value="#ffffff"></button>
-                <button id="swatch-box3" class="small-btn" value="#ffffff"></button>
-                <br/>
-                <button id="swatch-box4" class="small-btn" value="#ffffff"></button>
-                <button id="swatch-box5" class="small-btn" value="#ffffff"></button>
-                <br/>
-                <button id="swatch-box6" class="small-btn" value="#ffffff"></button>
-                <button id="swatch-box7" class="small-btn" value="#ffffff"></button>
-
+                <div class="swatch-row">
+                    <button id="swatch-box0" class="small-btn" value="#ffffff"></button>
+                    <button id="swatch-box1" class="small-btn" value="#ffffff"></button>
+                </div>
+                <div class="swatch-row">
+                    <button id="swatch-box2" class="small-btn" value="#ffffff"></button>
+                    <button id="swatch-box3" class="small-btn" value="#ffffff"></button>
+                </div>
+                <div class="swatch-row">
+                    <button id="swatch-box4" class="small-btn" value="#ffffff"></button>
+                    <button id="swatch-box5" class="small-btn" value="#ffffff"></button>
+                </div>
+                <div class="swatch-row">
+                    <button id="swatch-box6" class="small-btn" value="#ffffff"></button>
+                    <button id="swatch-box7" class="small-btn" value="#ffffff"></button>
+                </div>
+                <div id="picker">
+                    <button id="highlight" class="small-btn"></button>
+                    <button id="shadow" class="small-btn"></button>
+                    <br/>
+                    <input type="button" id="color-input" class="jscolor {closable:true,closeText:'Close'}" value="cc66ff" style="width:65px; height:30px;" title="Choose a color from the color picker">
+                </div>
             </div>
 
-            <p>
-                <button id="highlight" style="width: 25px; height:25px; background-color:white;"></button>
-                <button id="shadow" style="width: 25px; height:25px; background-color:black;"></button>
-                <br/>
-                <input type="button" id="color-input" class="jscolor {closable:true,closeText:'Close'}" value="cc66ff" style="width:60px; height:20px;" title="Choose a color from the color picker">
-            </p>
+            
         </div>
         <canvas width="1000" height="645" style="cursor: default; ">
             Your browser does not support Canvas
         </canvas>
+    </div>
     </div>
 </body>
 </html>

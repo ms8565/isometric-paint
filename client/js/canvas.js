@@ -163,7 +163,10 @@ const onMouseMove = (e) => {
                     socket.emit("pushAction", {triangles: changedTriangles});
                 }
                 else{
-                    drawAllTriangles();
+                    //Fix for lines bug
+                    if(!linesOn){
+                        drawAllTriangles();
+                    }
                     if(triangles[i].id != highlightTri.id){
                         //Turn the highlight for the current triangle on
                         triangles[i].highlightOn(currentColor);
