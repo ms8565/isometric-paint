@@ -8,6 +8,7 @@ body{
     float: left; 
     background-color: #D4D4D4;
     height: 645px;
+    text-align: center;
 }
 
 #paint-container{
@@ -15,3 +16,32 @@ body{
     padding-left: .25em;
     background-color: grey;
 }
+
+.large-btn{
+    width: 55px;
+    height: 55px;
+    font-size:35px;
+}
+
+#lines-toggle{
+    background-image: url(/assets/media/lines.png);
+    background-repeat:no-repeat;
+    background-position:center;
+}
+#clear-btn{
+    background-image: url(/assets/media/clear.png);
+    background-repeat:no-repeat;
+    width:65px;
+    height:30px;
+}
+#color-input{
+    width: 40pux
+}
+
+.small-btn{
+    width: 25px; 
+    height:25px; 
+    background-color:white;
+}
+
+

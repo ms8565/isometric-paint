@@ -23,6 +23,12 @@
     <script src="/assets/js/canvas.js"></script>
     <script src="/assets/js/main.js"></script>
     
+    <!--Bootstrap Glyphicons-->
+    <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.css">
+    
+    <!--Google Icons-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
 </head>
 <body>
     <div id="creation-container">
@@ -35,48 +41,49 @@
     
     <div id = "paint-container" style="display:none;">
         <p>
-            <input id="save-btn" type="button" value="Save" title="Download your image">
+            <input type="checkbox" id="tooltips-toggle" value="tooltips-checkbox" checked>
+            <label for="tooltips-toggle">Show Tooltips</label>
+            
+            <button id="save-btn" value=" " title="Download your image">
+                <span class="glyphicon glyphicon-floppy-save"></span>
+            </button>
+            
+            <button id="clear-btn" value=" " title="Clear all triangles"></button>
+            
+            <div id="clear-dialog" title="Erase Everything?" style="display:none">
+                <p>Are you sure you want to clear the whole screen? You wouldn't want to erase anyone else's hard work.</p>
+            </div>
         </p>
         <div id="controls">
-            <p>
-                <input type="checkbox" id="tooltips-toggle" value="tooltips-checkbox" checked/>
-                <label for="tooltips-toggle">Show Tooltips</label>
-            </p>
-            <p>
-                <input id="lines-toggle" type="button" value="Toggle Lines" title="Toggle triangle outlines on and off">
-            </p>
-            <p>
-                <input id="clear-btn" type="button" value="Clear" title="Clear all triangles">
-            </p>
-            
-            <p>
-                <input id="undo-btn" type="button" value="Undo">
-                <input id="redo-btn" type="button" value="Redo">
-            </p>
-            <p>
-                <input id="eyedropper-btn" type="button" value="Pick Color" title="Pick a color from another triangle">
-                <button id="erase-btn" value="#ffffff" style="width: 25px; height:25px; background-color:white;" title="Erase triangles"></button>
-            </p>
-                <div id="swatches">
-                    <button id="swatch-box0" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-                    <button id="swatch-box1" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-                    <br/>
-                    <button id="swatch-box2" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-                    <button id="swatch-box3" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-                    <br/>
-                    <button id="swatch-box4" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-                    <button id="swatch-box5" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-                    <br/>
-                    <button id="swatch-box6" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
-                    <button id="swatch-box7" value="#ffffff" style="width: 25px; height:25px; background-color:white;"></button>
+            <button id="lines-toggle" class="large-btn" value=" " title="Toggle triangle outlines on and off"></button>
+            <br/>
+            <button id="eyedropper-btn" class="large-btn" value="Pick Color" title="Pick a color from another triangle">
+                <i class="material-icons">colorize</i>
+            </button>
+            <br/>
+            <button id="erase-btn" class="large-btn" value="#ffffff" title="Erase triangles">
+                <span class="glyphicon glyphicon-erase"></span>
+            </button>
+            <div id="swatches">
+                <button id="swatch-box0" class="small-btn" value="#ffffff"></button>
+                <button id="swatch-box1" class="small-btn" value="#ffffff"></button>
+                <br/>
+                <button id="swatch-box2" class="small-btn" value="#ffffff"></button>
+                <button id="swatch-box3" class="small-btn" value="#ffffff"></button>
+                <br/>
+                <button id="swatch-box4" class="small-btn" value="#ffffff"></button>
+                <button id="swatch-box5" class="small-btn" value="#ffffff"></button>
+                <br/>
+                <button id="swatch-box6" class="small-btn" value="#ffffff"></button>
+                <button id="swatch-box7" class="small-btn" value="#ffffff"></button>
 
-                </div>
+            </div>
 
             <p>
                 <button id="highlight" style="width: 25px; height:25px; background-color:white;"></button>
                 <button id="shadow" style="width: 25px; height:25px; background-color:black;"></button>
                 <br/>
-                <input type="button" id="color-input" class="jscolor {closable:true,closeText:'Close'}" value="cc66ff" style="width:50px; height:20px;" title="Choose a color from the color picker">
+                <input type="button" id="color-input" class="jscolor {closable:true,closeText:'Close'}" value="cc66ff" style="width:60px; height:20px;" title="Choose a color from the color picker">
             </p>
         </div>
         <canvas width="1000" height="645" style="cursor: default; ">

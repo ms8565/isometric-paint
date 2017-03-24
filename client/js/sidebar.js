@@ -17,16 +17,10 @@ const setupControls = () => {
     $('save-btn').tooltip();
 
     var clearBtn = document.getElementById('clear-btn');
-    clearBtn.addEventListener("click",clearCanvas);
+    clearBtn.addEventListener("click",createClearDialog);
 
     var eyedropperBtn = document.getElementById('eyedropper-btn');
     eyedropperBtn.addEventListener("click",toggleEyedropper);
-
-    var undoBtn = document.getElementById('undo-btn');
-    undoBtn.addEventListener("click",undoAction);
-
-    var redoBtn = document.getElementById('redo-btn');
-    redoBtn.addEventListener("click",redoAction);
     
     var eraseBtn = document.getElementById('erase-btn');
     eraseBtn.addEventListener("click",function(){
@@ -72,6 +66,24 @@ const setupControls = () => {
     });
     
 };
+
+const createClearDialog = () => {
+    $( "#clear-dialog" ).dialog({
+      resizable: false,
+      height: "auto",
+      width: 400,
+      modal: true,
+      buttons: {
+        "Clear Triangles": function() {
+            clearCanvas();
+          $( this ).dialog( "close" ); 
+        },
+        Cancel: function() {
+          $( this ).dialog( "close" );
+        }
+      }
+    });
+}
 
 const clearCanvas = () => {
     for(var i = 0; i < triangles.length; i++){
